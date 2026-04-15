@@ -5,8 +5,12 @@ from data import Urls, CourierMessages
 from helpers.courier_helper import generate_random_string, register_new_courier_and_return_login_password, delete_courier, get_courier_id
 
 
+@allure.feature("Авторизация курьера")
 class TestLoginCourier:
-     def test_login_courier_success(self):
+
+    @allure.title("Успешная авторизация курьера")
+    @allure.description("Проверяем, что курьер может авторизоваться с валидными данными")
+    def test_login_courier_success(self):
         courier_data = register_new_courier_and_return_login_password()
         
         login = courier_data[0]
@@ -27,7 +31,9 @@ class TestLoginCourier:
         delete_courier(courier_id)
 
 
-     def test_login_wrong_password_fails(self):
+    @allure.title("Авторизация с неверным паролем")
+    @allure.description("Проверяем, что авторизация с неверным паролем возвращает ошибку")
+    def test_login_wrong_password_fails(self):
         courier_data = register_new_courier_and_return_login_password()
         
         login = courier_data[0]
@@ -48,8 +54,10 @@ class TestLoginCourier:
         delete_courier(courier_id)
 
 
-     @pytest.mark.parametrize("missing_field", ["login", "password"])
-     def test_login_missing_field_fails(self, missing_field):
+    @allure.title("Авторизация без обязательных полей")
+    @allure.description("Проверяем, что авторизация без обязательных полей возвращает ошибку")
+    @pytest.mark.parametrize("missing_field", ["login", "password"])
+    def test_login_missing_field_fails(self, missing_field):
         
         payload = {
             "login": generate_random_string(10),
@@ -64,8 +72,10 @@ class TestLoginCourier:
         assert CourierMessages.ERROR_MISSING_AUTH_FIELDS in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_AUTH_FIELDS}', получено {response.json().get('message')}"
         
 
-     @pytest.mark.parametrize("field_name", ["login", "password"])
-     def test_login_empty_field_fails(self, field_name):
+    @allure.title("Авторизация с пустыми полями")
+    @allure.description("Проверяем, что авторизация с пустыми полями возвращает ошибку")
+    @pytest.mark.parametrize("field_name", ["login", "password"])
+    def test_login_empty_field_fails(self, field_name):
         payload = {
             "login": generate_random_string(10),
             "password": generate_random_string(10)
@@ -77,7 +87,9 @@ class TestLoginCourier:
         assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
 
-     def test_login_nonexistent_login_fails(self):
+    @allure.title("Авторизация с несуществующим логином")
+    @allure.description("Проверяем, что авторизация с несуществующим логином возвращает ошибку")
+    def test_login_nonexistent_login_fails(self):
         payload = {
             "login": "nonexistent_login_312122",
             "password": "password123"

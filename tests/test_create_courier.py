@@ -21,9 +21,9 @@ class TestCreateCourier:
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
   
 
-        assert response.status_code == 201
+        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
         
-        assert response.json() == CourierMessages.SUCCESS_CREATE
+        assert response.json() == CourierMessages.SUCCESS_CREATE, f"Ожидался {CourierMessages.SUCCESS_CREATE}, получен {response.json()}"
         
         courier_id = get_courier_id(login, password)
         if courier_id:
@@ -44,9 +44,9 @@ class TestCreateCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
         
-        assert response.status_code == 409
+        assert response.status_code == 409, f"Ожидался статус 409, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message")
+        assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_DUPLICATE_LOGIN}', получено {response.json().get('message')}"
         
         courier_id = get_courier_id(login, password)
         if courier_id:
@@ -64,9 +64,9 @@ class TestCreateCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
         
-        assert response.status_code == 400
+        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_MISSING_FIELD in response.json().get("message")
+        assert CourierMessages.ERROR_MISSING_FIELD in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_FIELD}', получено {response.json().get('message')}"
         
     @pytest.mark.parametrize("field_name", ["login", "password", "firstName"])
     def test_create_courier_empty_field_fails(self, field_name):
@@ -79,7 +79,7 @@ class TestCreateCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
         
-        assert response.status_code == 400
+        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
     def test_create_courier_existing_login_fails(self, create_and_delete_courier):
         existing_courier = create_and_delete_courier
@@ -92,6 +92,6 @@ class TestCreateCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
         
-        assert response.status_code == 409
+        assert response.status_code == 409, f"Ожидался статус 409, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message")
+        assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_DUPLICATE_LOGIN}', получено {response.json().get('message')}"

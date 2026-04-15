@@ -19,9 +19,9 @@ class TestLoginCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
         
-        assert "id" in response.json()
+        assert "id" in response.json(), "В ответе отсутствует поле 'id'"
         
         courier_id = response.json().get("id")
         delete_courier(courier_id)
@@ -39,8 +39,8 @@ class TestLoginCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
 
-        assert response.status_code == 404
-        assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message")
+        assert response.status_code == 404, f"Ожидался статус 404, получен {response.status_code}"
+        assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_AUTH_FAILED}', получено {response.json().get('message')}"
         
         correct_payload = {"login": login, "password": courier_data[1]}
         login_response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=correct_payload)
@@ -59,9 +59,9 @@ class TestLoginCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 400
+        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_MISSING_AUTH_FIELDS in response.json().get("message")
+        assert CourierMessages.ERROR_MISSING_AUTH_FIELDS in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_AUTH_FIELDS}', получено {response.json().get('message')}"
         
 
      @pytest.mark.parametrize("field_name", ["login", "password"])
@@ -74,7 +74,7 @@ class TestLoginCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 400
+        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
 
      def test_login_nonexistent_login_fails(self):
@@ -85,6 +85,6 @@ class TestLoginCourier:
         
         response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 404
+        assert response.status_code == 404, f"Ожидался статус 404, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message")
+        assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_AUTH_FAILED}', получено {response.json().get('message')}"

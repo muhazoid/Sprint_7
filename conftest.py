@@ -1,5 +1,4 @@
 import pytest
-import requests
 from helpers.courier_helper import register_new_courier_and_return_login_password, delete_courier, get_courier_id
 from data import Urls
 

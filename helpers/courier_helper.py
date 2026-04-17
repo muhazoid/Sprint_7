@@ -20,7 +20,7 @@ def register_new_courier_and_return_login_password():
         "firstName": first_name
     }
 
-    response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+    response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
 
     if response.status_code == 201:
         login_pass.append(login)

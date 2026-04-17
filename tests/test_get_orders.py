@@ -1,5 +1,4 @@
 import allure
-import pytest
 import requests
 from data import Urls
 from helpers.order_helper import Orders

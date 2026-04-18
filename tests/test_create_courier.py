@@ -10,36 +10,22 @@ class TestCreateCourier:
     
     @allure.title("Успешное создание курьера")
     @allure.description("Проверяем, что курьер создается с валидными данными")
-    def test_create_courier_success(self):
-        login = generate_random_string(10)
-        password = generate_random_string(10)
-        first_name = generate_random_string(10)
-        
-        payload = {
-            "login": login,
-            "password": password,
-            "firstName": first_name
-        }
-        
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
-  
-
-        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
-        
-        assert response.json() == CourierMessages.SUCCESS_CREATE, f"Ожидался {CourierMessages.SUCCESS_CREATE}, получен {response.json()}"
-        
-        courier_id = get_courier_id(login, password)
-        if courier_id:
-            delete_courier(courier_id)
+    def test_create_courier_success(self, create_and_delete_courier_with_response):
+        response = create_and_delete_courier_with_response["response"]
+    
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
+    
+        with allure.step("Проверка тела ответа"):
+            assert response.json() == CourierMessages.SUCCESS_CREATE, f"Ожидался {CourierMessages.SUCCESS_CREATE}, получен {response.json()}"
+            
 
     @allure.title("Создание дубликата курьера")
     @allure.description("Проверяем, что нельзя создать двух курьеров с одинаковыми данными")
-    def test_create_duplicate_courier_fails(self):
-        courier_data = register_new_courier_and_return_login_password()
-        
-        login = courier_data[0]
-        password = courier_data[1]
-        first_name = courier_data[2]
+    def test_create_duplicate_courier_fails(self, create_and_delete_courier):
+        login = create_and_delete_courier["login"]
+        password = create_and_delete_courier["password"]
+        first_name = create_and_delete_courier["firstName"]
         
         payload = {
             "login": login,
@@ -47,15 +33,14 @@ class TestCreateCourier:
             "firstName": first_name
         }
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
+        with allure.step("Отправка POST-запроса на создание дубликата курьера"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 409, f"Ожидался статус 409, получен {response.status_code}"
+        with allure.step("Проверка сообщения об ошибке"):
+            assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_DUPLICATE_LOGIN}', получено {response.json().get('message')}"
         
-        assert response.status_code == 409, f"Ожидался статус 409, получен {response.status_code}"
-        
-        assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_DUPLICATE_LOGIN}', получено {response.json().get('message')}"
-        
-        courier_id = get_courier_id(login, password)
-        if courier_id:
-            delete_courier(courier_id)
+
 
     @allure.title("Создание курьера без обязательного поля")
     @allure.description("Проверяем, что нельзя создать  курьера без обязательного поля")
@@ -69,12 +54,15 @@ class TestCreateCourier:
         
         del payload[missing_field]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
-        
-        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
-        
-        assert CourierMessages.ERROR_MISSING_FIELD in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_FIELD}', получено {response.json().get('message')}"
-
+        with allure.step(f"Отправка POST-запроса на создание курьера без поля '{missing_field}'"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
+    
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
+    
+        with allure.step("Проверка сообщения об ошибке"):
+            assert CourierMessages.ERROR_MISSING_FIELD in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_FIELD}', получено {response.json().get('message')}"
+            
 
     @allure.title("Создание курьера с пустым обязательным полем")
     @allure.description("Проверяем, что нельзя создать  курьера с пустым обязательным полем")    
@@ -87,9 +75,12 @@ class TestCreateCourier:
         }
         payload[field_name] = ""
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
-        
-        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
+        with allure.step(f"Отправка POST-запроса на создание курьера с пустым полем '{field_name}'"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
+    
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
+            
 
 
     @allure.title("Создание курьера с уже используемым логином")
@@ -103,8 +94,12 @@ class TestCreateCourier:
             "firstName": generate_random_string(10)
         }
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
-        
-        assert response.status_code == 409, f"Ожидался статус 409, получен {response.status_code}"
-        
-        assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_DUPLICATE_LOGIN}', получено {response.json().get('message')}"
+        with allure.step(f"Отправка POST-запроса на создание курьера с существующим логином '{existing_courier['login']}'"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier', data=payload)
+    
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 409, f"Ожидался статус 409, получен {response.status_code}"
+    
+        with allure.step("Проверка сообщения об ошибке"):
+            assert CourierMessages.ERROR_DUPLICATE_LOGIN in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_DUPLICATE_LOGIN}', получено {response.json().get('message')}"
+            

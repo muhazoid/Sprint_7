@@ -10,48 +10,44 @@ class TestLoginCourier:
 
     @allure.title("Успешная авторизация курьера")
     @allure.description("Проверяем, что курьер может авторизоваться с валидными данными")
-    def test_login_courier_success(self):
-        courier_data = register_new_courier_and_return_login_password()
+    def test_login_courier_success(self, create_and_delete_courier):
+        courier_data = create_and_delete_courier
         
-        login = courier_data[0]
-        password = courier_data[1]
         
         payload = {
-            "login": login,
-            "password": password
+            "login": courier_data["login"],
+            "password": courier_data["password"]
         }
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
+        with allure.step("Отправка POST-запроса на авторизацию курьера"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
         
-        assert "id" in response.json(), "В ответе отсутствует поле 'id'"
-        
-        courier_id = response.json().get("id")
-        delete_courier(courier_id)
+        with allure.step("Проверка наличия поля 'id' в ответе"):
+            assert "id" in response.json(), "В ответе отсутствует поле 'id'"
+                
 
 
     @allure.title("Авторизация с неверным паролем")
     @allure.description("Проверяем, что авторизация с неверным паролем возвращает ошибку")
-    def test_login_wrong_password_fails(self):
-        courier_data = register_new_courier_and_return_login_password()
-        
-        login = courier_data[0]
+    def test_login_wrong_password_fails(self, create_and_delete_courier):
+        courier_data = create_and_delete_courier
          
         payload = {
-            "login": login,
+            "login": courier_data["login"],
             "password": "password2345"
         }
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
-
-        assert response.status_code == 404, f"Ожидался статус 404, получен {response.status_code}"
-        assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_AUTH_FAILED}', получено {response.json().get('message')}"
+        with allure.step(f"Отправка POST-запроса на авторизацию с неверным паролем"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        correct_payload = {"login": login, "password": courier_data[1]}
-        login_response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=correct_payload)
-        courier_id = login_response.json().get("id")
-        delete_courier(courier_id)
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 404, f"Ожидался статус 404, получен {response.status_code}"
+        
+        with allure.step("Проверка сообщения об ошибке"):
+            assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_AUTH_FAILED}', получено {response.json().get('message')}"
 
 
     @allure.title("Авторизация без обязательных полей")
@@ -65,11 +61,14 @@ class TestLoginCourier:
         }
         del payload[missing_field]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
+        with allure.step(f"Отправка POST-запроса на авторизацию без поля '{missing_field}'"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_MISSING_AUTH_FIELDS in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_AUTH_FIELDS}', получено {response.json().get('message')}"
+        with allure.step("Проверка сообщения об ошибке"):
+            assert CourierMessages.ERROR_MISSING_AUTH_FIELDS in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_MISSING_AUTH_FIELDS}', получено {response.json().get('message')}"
         
 
     @allure.title("Авторизация с пустыми полями")
@@ -82,10 +81,12 @@ class TestLoginCourier:
         }
         payload[field_name] = ""
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
+        with allure.step(f"Отправка POST-запроса на авторизацию с пустым полем '{field_name}'"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
-        
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
+                
 
     @allure.title("Авторизация с несуществующим логином")
     @allure.description("Проверяем, что авторизация с несуществующим логином возвращает ошибку")
@@ -95,8 +96,12 @@ class TestLoginCourier:
             "password": "password123"
         }
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
+        with allure.step("Отправка POST-запроса на авторизацию с несуществующим логином"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/courier/login', data=payload)
         
-        assert response.status_code == 404, f"Ожидался статус 404, получен {response.status_code}"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 404, f"Ожидался статус 404, получен {response.status_code}"
         
-        assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_AUTH_FAILED}', получено {response.json().get('message')}"
+        with allure.step("Проверка сообщения об ошибке"):
+            assert CourierMessages.ERROR_AUTH_FAILED in response.json().get("message"), f"Ожидалось сообщение '{CourierMessages.ERROR_AUTH_FAILED}', получено {response.json().get('message')}"
+                

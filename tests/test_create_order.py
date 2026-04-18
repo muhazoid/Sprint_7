@@ -14,11 +14,18 @@ class TestCreateOrder:
         payload = order_template.copy()
         payload["color"] = OrderData.COLORS["BLACK"]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
+        with allure.step("Отправка POST-запроса на создание заказа"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
         
-        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
-        assert "track" in response.json(), "В ответе отсутствует поле 'track'"
-        assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
+                
+        with allure.step("Проверка наличия поля 'track' в ответе"):
+            assert "track" in response.json(), "В ответе отсутствует поле 'track'"
+                
+        with allure.step("Проверка, что значение track не пустое"):
+            assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+                
 
 
     @allure.title("Создание заказа с пустым телом запроса")
@@ -26,9 +33,11 @@ class TestCreateOrder:
     def test_create_order_with_empty_json_fails(self):
         payload = {}
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
+        with allure.step("Отправка POST-запроса с пустым телом"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
         
-        assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 400, f"Ожидался статус 400, получен {response.status_code}"
         
 
     @allure.title("Создание заказа без указания цвета")
@@ -37,11 +46,17 @@ class TestCreateOrder:
         payload = OrderData.BASE_ORDER.copy()
         payload["color"] = OrderData.COLORS["NONE"]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
+        with allure.step("Отправка POST-запроса на создание заказа без указания цвета"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
         
-        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
-        assert "track" in response.json(), "В ответе отсутствует поле 'track'"
-        assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
+        
+        with allure.step("Проверка наличия поля 'track' в ответе"):
+            assert "track" in response.json(), "В ответе отсутствует поле 'track'"
+        
+        with allure.step("Проверка, что значение track не пустое"):
+            assert response.json()["track"] is not None, "Значение track не должно быть пустым"
 
 
     @allure.title("Создание заказа с цветом BLACK")
@@ -50,11 +65,18 @@ class TestCreateOrder:
         payload = OrderData.BASE_ORDER.copy()
         payload["color"] = OrderData.COLORS["BLACK"]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
+        with allure.step("Отправка POST-запроса на создание заказа с цветом BLACK"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
         
-        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
-        assert "track" in response.json(), "В ответе отсутствует поле 'track'"
-        assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
+        
+        with allure.step("Проверка наличия поля 'track' в ответе"):
+            assert "track" in response.json(), "В ответе отсутствует поле 'track'"
+        
+        with allure.step("Проверка, что значение track не пустое"):
+            assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+                
     
 
     @allure.title("Создание заказа с цветом GREY")
@@ -63,11 +85,17 @@ class TestCreateOrder:
         payload = OrderData.BASE_ORDER.copy()
         payload["color"] = OrderData.COLORS["GREY"]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
+        with allure.step("Отправка POST-запроса на создание заказа с цветом GREY"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
         
-        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
-        assert "track" in response.json(), "В ответе отсутствует поле 'track'"
-        assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
+        
+        with allure.step("Проверка наличия поля 'track' в ответе"):
+            assert "track" in response.json(), "В ответе отсутствует поле 'track'"
+        
+        with allure.step("Проверка, что значение track не пустое"):
+            assert response.json()["track"] is not None, "Значение track не должно быть пустым"
 
 
     @allure.title("Создание заказа с двумя цветами")
@@ -76,8 +104,14 @@ class TestCreateOrder:
         payload = OrderData.BASE_ORDER.copy()
         payload["color"] = OrderData.COLORS["BOTH"]
         
-        response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
+        with allure.step("Отправка POST-запроса на создание заказа с двумя цветами (BLACK и GREY)"):
+            response = requests.post(f'{Urls.BASE_URL}/api/v1/orders', json=payload)
         
-        assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
-        assert "track" in response.json(), "В ответе отсутствует поле 'track'"
-        assert response.json()["track"] is not None, "Значение track не должно быть пустым"
+        with allure.step("Проверка статус-кода ответа"):
+            assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
+        
+        with allure.step("Проверка наличия поля 'track' в ответе"):
+            assert "track" in response.json(), "В ответе отсутствует поле 'track'"
+        
+        with allure.step("Проверка, что значение track не пустое"):
+            assert response.json()["track"] is not None, "Значение track не должно быть пустым"
